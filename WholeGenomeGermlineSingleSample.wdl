@@ -207,6 +207,10 @@ workflow WholeGenomeGermlineSingleSample {
     File gvcf_summary_metrics = BamToGvcf.vcf_summary_metrics
     File gvcf_detail_metrics = BamToGvcf.vcf_detail_metrics
 
+    # Additional files
+    File? sorted_bam = UnmappedBamToAlignedBam.sorted_bam
+    File? sorted_bam_index = UnmappedBamToAlignedBam.sorted_bam_index
+
     File? output_bam = provided_output_bam
     File? output_bam_index = provided_output_bam_index
 

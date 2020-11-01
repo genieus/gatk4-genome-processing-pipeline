@@ -42,6 +42,9 @@ workflow UnmappedBamToAlignedBam {
     Boolean hard_clip_reads = false
     Boolean bin_base_qualities = true
     Boolean somatic = false
+
+    # Optional outputs
+    Boolean output_sorted_bam = false
   }
 
   Float cutoff_for_large_rg_in_gb = 20.0
@@ -272,6 +275,10 @@ workflow UnmappedBamToAlignedBam {
 
     File output_bam = GatherBamFiles.output_bam
     File output_bam_index = GatherBamFiles.output_bam_index
+
+    # Additional files
+    File? sorted_bam = if (output_sorted_bam) then SortSampleBam.output_bam else ''
+    File? sorted_bam_index = if (output_sorted_bam) then SortSampleBam.output_bam_index else ''
   }
   meta {
     allowNestedInputs: true
