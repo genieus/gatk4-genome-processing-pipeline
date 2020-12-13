@@ -199,7 +199,7 @@ task SumFloats {
   python -c "print ~{sep="+" sizes}"
   >>>
   output {
-    Float total_size = read_float(stdout())
+    Float total_size = read_lines(stdout())[0]
   }
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/python:2.7"

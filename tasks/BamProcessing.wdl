@@ -547,6 +547,6 @@ task CheckContamination {
   }
   output {
     File selfSM = "~{output_prefix}.selfSM"
-    Float contamination = read_float(stdout())
+    Float contamination = read_lines(stdout())[0]
   }
 }
