@@ -252,6 +252,12 @@ workflow UnmappedBamToAlignedBam {
       preemptible_tries = papi_settings.agg_preemptible_tries
   }
 
+  # Optional outputs controlled by input flags (to change when None is implemented)
+  if (output_sorted_bam) {
+    File? sorted_bam_temp = SortSampleBam.output_bam
+    File? sorted_bam_index_temp = SortSampleBam.output_bam_index
+  }
+
   # Outputs that will be retained when execution is complete
   output {
     Array[File] quality_yield_metrics = CollectQualityYieldMetrics.quality_yield_metrics
@@ -277,8 +283,8 @@ workflow UnmappedBamToAlignedBam {
     File output_bam_index = GatherBamFiles.output_bam_index
 
     # Additional files
-    File? sorted_bam = if (output_sorted_bam) then SortSampleBam.output_bam else ''
-    File? sorted_bam_index = if (output_sorted_bam) then SortSampleBam.output_bam_index else ''
+    File? sorted_bam = sorted_bam_temp
+    File? sorted_bam_index = sorted_bam_index_temp
   }
   meta {
     allowNestedInputs: true
