@@ -37,6 +37,10 @@ workflow SplitLargeReadGroup {
     Int preemptible_tries
     Int reads_per_file = 48000000
     Boolean hard_clip_reads = false
+
+    # Resources
+    Int cpu
+    String mem
   }
 
   call Alignment.SamSplitter as SamSplitter {
@@ -59,7 +63,9 @@ workflow SplitLargeReadGroup {
         reference_fasta = reference_fasta,
         compression_level = compression_level,
         preemptible_tries = preemptible_tries,
-        hard_clip_reads = hard_clip_reads
+        hard_clip_reads = hard_clip_reads,
+        cpu = cpu,
+        mem = mem
     }
 
     Float current_mapped_size = size(SamToFastqAndBwaMemAndMba.output_bam, "GiB")

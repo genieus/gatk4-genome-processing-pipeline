@@ -107,7 +107,7 @@ task ScatterIntervalList {
   >>>
   output {
     Array[File] out = glob("out/*/*.interval_list")
-    Int interval_count = read_int(stdout())
+    Int interval_count = read_lines(stdout())[0]
   }
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"

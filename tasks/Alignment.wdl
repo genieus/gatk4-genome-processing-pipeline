@@ -32,6 +32,10 @@ task SamToFastqAndBwaMemAndMba {
     Int compression_level
     Int preemptible_tries
     Boolean hard_clip_reads = false
+
+    # Resources
+    Int cpu = 16
+    String mem = "14 GiB"
   }
 
   Float unmapped_bam_size = size(input_bam, "GiB")
@@ -111,8 +115,8 @@ task SamToFastqAndBwaMemAndMba {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330" # TODO: update docker to use the new Picard options
     preemptible: preemptible_tries
-    memory: "14 GiB"
-    cpu: "16"
+    memory: "~{mem}"
+    cpu: "~{cpu}"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {

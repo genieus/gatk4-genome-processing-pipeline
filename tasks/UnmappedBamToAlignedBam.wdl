@@ -43,13 +43,17 @@ workflow UnmappedBamToAlignedBam {
     Boolean bin_base_qualities = true
     Boolean somatic = false
 
+    # Resources
+    Int cpu = 16
+    String mem = "14 GiB"
+
     # Optional outputs
     Boolean output_sorted_bam = false
   }
 
   Float cutoff_for_large_rg_in_gb = 20.0
 
-  String bwa_commandline = "bwa mem -K 100000000 -p -v 3 -t 16 -Y $bash_ref_fasta"
+  String bwa_commandline = "bwa mem -K 100000000 -p -v 3 -t ~{cpu} -Y $bash_ref_fasta"
 
   Int compression_level = 2
 
@@ -81,7 +85,9 @@ workflow UnmappedBamToAlignedBam {
           reference_fasta = references.reference_fasta,
           compression_level = compression_level,
           preemptible_tries = papi_settings.preemptible_tries,
-          hard_clip_reads = hard_clip_reads
+          hard_clip_reads = hard_clip_reads,
+          cpu = cpu,
+          mem = mem
       }
     }
 
@@ -95,7 +101,9 @@ workflow UnmappedBamToAlignedBam {
           reference_fasta = references.reference_fasta,
           compression_level = compression_level,
           preemptible_tries = papi_settings.preemptible_tries,
-          hard_clip_reads = hard_clip_reads
+          hard_clip_reads = hard_clip_reads,
+          cpu = cpu,
+          mem = mem
       }
     }
 
