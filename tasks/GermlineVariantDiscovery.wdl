@@ -126,11 +126,11 @@ task HaplotypeCaller_GATK4_VCF {
     # Cromwell doesn't like optional task outputs, so we have to touch this file.
     touch ~{vcf_basename}.bamout.bam
   >>>
-
+  # BAM 48G size - 11G RAM
   runtime {
     docker: gatk_docker
     preemptible: preemptible_tries
-    memory: "6.5 GiB"
+    memory: "12 GiB"
     cpu: "2"
     disks: "local-disk " + disk_size + " HDD"
   }

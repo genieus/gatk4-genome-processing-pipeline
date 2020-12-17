@@ -49,5 +49,7 @@
     "agg_preemptible_tries": 3
   },
   "WholeGenomeGermlineSingleSample.provide_bam_output": true,
-  "WholeGenomeGermlineSingleSample.use_gatk3_haplotype_caller": false
+  "WholeGenomeGermlineSingleSample.use_gatk3_haplotype_caller": false,
+  "WholeGenomeGermlineSingleSample.UnmappedBamToAlignedBam.output_sorted_bam": true,
+  "WholeGenomeGermlineSingleSample.UnmappedBamToAlignedBam.cpu": 4
 }
