@@ -72,7 +72,7 @@ task CollectUnsortedReadgroupBamQualityMetrics {
   }
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
-    memory: "7 GiB"
+    memory: "15 GiB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -328,7 +328,7 @@ task CheckPreValidation {
     Float max_chimerism_in_reasonable_sample
     Int preemptible_tries
   }
-  
+
   command <<<
     set -o pipefail
     set -e
@@ -442,10 +442,11 @@ task CollectWgsMetrics {
       USE_FAST_ALGORITHM=true \
       READ_LENGTH=~{read_length}
   }
+  # "3 GiB" Broad
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
-    memory: "3 GiB"
+    memory: "15 GiB" 
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -464,7 +465,7 @@ task CollectRawWgsMetrics {
     File ref_fasta_index
     Int read_length
     Int preemptible_tries
-    Int memory_multiplier = 1
+    Int memory_multiplier = 2
     Int additional_disk = 20
   }
 
