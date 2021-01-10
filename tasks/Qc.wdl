@@ -36,6 +36,7 @@ task CollectQualityYieldMetrics {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     disks: "local-disk " + disk_size + " HDD"
     memory: "3 GiB"
+    cpu: "1"
     preemptible: preemptible_tries
   }
   output {
@@ -73,6 +74,7 @@ task CollectUnsortedReadgroupBamQualityMetrics {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     memory: "15 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -125,6 +127,7 @@ task CollectReadgroupBamQualityMetrics {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     memory: "7 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -179,6 +182,7 @@ task CollectAggregationMetrics {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     memory: "7 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -229,6 +233,7 @@ task ConvertSequencingArtifactToOxoG {
     runtime {
       docker: "us.gcr.io/broad-gotc-prod/picard-cloud:2.22.3"
       memory: "~{memory_size} GiB"
+      cpu: "1"
       disks: "local-disk " + disk_size + " HDD"
       preemptible: preemptible_tries
     }
@@ -268,6 +273,7 @@ task CrossCheckFingerprints {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
     memory: "2 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -312,6 +318,7 @@ task CheckFingerprint {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
     memory: "3 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -361,6 +368,7 @@ task CheckPreValidation {
     preemptible: preemptible_tries
     docker: "us.gcr.io/broad-gotc-prod/python:2.7"
     memory: "2 GiB"
+    cpu: "1"
   }
   output {
     Float duplication_rate = read_float("duplication_value.txt")
@@ -408,6 +416,7 @@ task ValidateSamFile {
     preemptible: preemptible_tries
     memory: "~{memory_size} GiB"
     disks: "local-disk " + disk_size + " HDD"
+    cpu: "1"
   }
   output {
     File report = "~{report_filename}"
@@ -446,7 +455,8 @@ task CollectWgsMetrics {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
-    memory: "15 GiB" 
+    memory: "15 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -491,6 +501,7 @@ task CollectRawWgsMetrics {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
     memory: "~{memory_size} GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -539,6 +550,7 @@ task CollectHsMetrics {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
     memory: "~{memory_size} GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
 
@@ -568,6 +580,7 @@ task CalculateReadGroupChecksum {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
     memory: "2 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -608,6 +621,7 @@ task ValidateVCF {
     docker: gatk_docker
     preemptible: preemptible_tries
     memory: "7000 MiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
 }
@@ -642,6 +656,7 @@ task CollectVariantCallingMetrics {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
     memory: "3 GiB"
+    cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
