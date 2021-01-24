@@ -99,7 +99,7 @@ workflow WholeGenomeGermlineSingleSample {
       ref_fasta = references.reference_fasta.ref_fasta,
       ref_fasta_index = references.reference_fasta.ref_fasta_index,
       ref_dict = references.reference_fasta.ref_dict,
-      duplication_metrics = UnmappedBamToAlignedBam.duplicate_metrics,
+      #duplication_metrics = UnmappedBamToAlignedBam.duplicate_metrics,
       chimerism_metrics = AggregatedBamQC.agg_alignment_summary_metrics,
       base_file_name = sample_and_unmapped_bams.base_file_name,
       agg_preemptible_tries = papi_settings.agg_preemptible_tries
@@ -201,7 +201,7 @@ workflow WholeGenomeGermlineSingleSample {
     File wgs_metrics = CollectWgsMetrics.metrics
     File raw_wgs_metrics = CollectRawWgsMetrics.metrics
 
-    File duplicate_metrics = UnmappedBamToAlignedBam.duplicate_metrics
+    #File duplicate_metrics = UnmappedBamToAlignedBam.duplicate_metrics
     File output_bqsr_reports = UnmappedBamToAlignedBam.output_bqsr_reports
 
     File gvcf_summary_metrics = BamToGvcf.vcf_summary_metrics
@@ -218,7 +218,7 @@ workflow WholeGenomeGermlineSingleSample {
     File output_cram_index = BamToCram.output_cram_index
     File output_cram_md5 = BamToCram.output_cram_md5
 
-    File validate_cram_file_report = BamToCram.validate_cram_file_report
+    #File validate_cram_file_report = BamToCram.validate_cram_file_report
 
     File output_vcf = BamToGvcf.output_vcf
     File output_vcf_index = BamToGvcf.output_vcf_index

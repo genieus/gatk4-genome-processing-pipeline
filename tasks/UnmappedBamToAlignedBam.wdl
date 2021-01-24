@@ -22,6 +22,7 @@ import "./Qc.wdl" as QC
 import "./BamProcessing.wdl" as Processing
 import "./Utilities.wdl" as Utils
 import "../structs/DNASeqStructs.wdl" as Structs
+import "../../tasks/sambamba.wdl" as Sambamba
 
 # WORKFLOW DEFINITION
 workflow UnmappedBamToAlignedBam {
@@ -135,20 +136,27 @@ workflow UnmappedBamToAlignedBam {
   # Aggregate aligned+merged flowcell BAM files and mark duplicates
   # We take advantage of the tool's ability to take multiple BAM inputs and write out a single output
   # to avoid having to spend time just merging BAM files.
-  call Processing.MarkDuplicates as MarkDuplicates {
+  #call Processing.MarkDuplicates as MarkDuplicates {
+  #  input:
+  #    input_bams = output_aligned_bam,
+  #    output_bam_basename = sample_and_unmapped_bams.base_file_name + ".aligned.unsorted.duplicates_marked",
+  #    metrics_filename = sample_and_unmapped_bams.base_file_name + ".duplicate_metrics",
+  #    total_input_size = SumFloats.total_size,
+  #    compression_level = compression_level,
+  #    preemptible_tries = if data_too_large_for_preemptibles then 0 else papi_settings.agg_preemptible_tries
+  #}
+
+  call Sambamba.Markdup as MarkDuplicates {
     input:
-      input_bams = output_aligned_bam,
-      output_bam_basename = sample_and_unmapped_bams.base_file_name + ".aligned.unsorted.duplicates_marked",
-      metrics_filename = sample_and_unmapped_bams.base_file_name + ".duplicate_metrics",
-      total_input_size = SumFloats.total_size,
-      compression_level = compression_level,
-      preemptible_tries = if data_too_large_for_preemptibles then 0 else papi_settings.agg_preemptible_tries
+      inputBams = output_aligned_bam,
+      outputPath = sample_and_unmapped_bams.base_file_name + ".aligned.unsorted.duplicates_marked.bam",
+      threads = 4
   }
 
   # Sort aggregated+deduped BAM file and fix tags
   call Processing.SortSam as SortSampleBam {
     input:
-      input_bam = MarkDuplicates.output_bam,
+      input_bam = MarkDuplicates.outputBam,
       output_bam_basename = sample_and_unmapped_bams.base_file_name + ".aligned.duplicate_marked.sorted",
       compression_level = compression_level,
       preemptible_tries = if data_too_large_for_preemptibles then 0 else papi_settings.agg_preemptible_tries
@@ -284,7 +292,7 @@ workflow UnmappedBamToAlignedBam {
     File selfSM = CheckContamination.selfSM
     Float contamination = CheckContamination.contamination
 
-    File duplicate_metrics = MarkDuplicates.duplicate_metrics
+    #File duplicate_metrics = MarkDuplicates.duplicate_metrics
     File output_bqsr_reports = GatherBqsrReports.output_bqsr_report
 
     File output_bam = GatherBamFiles.output_bam
