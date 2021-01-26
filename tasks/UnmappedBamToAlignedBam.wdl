@@ -120,6 +120,14 @@ workflow UnmappedBamToAlignedBam {
         output_bam_prefix = unmapped_bam_basename + ".readgroup",
         preemptible_tries = papi_settings.preemptible_tries
     }
+
+    call Sambamba.Sort as SortSampleBam {
+      input:
+        inputBam = output_aligned_bam,
+        outputPath = sample_and_unmapped_bams.base_file_name + ".aligned.sorted.bam",
+        compressionLevel = compression_level,
+        threads = 4
+    }
   }
 
   # Sum the read group bam sizes to approximate the aggregated bam size
@@ -148,8 +156,8 @@ workflow UnmappedBamToAlignedBam {
 
   call Sambamba.Markdup as MarkDuplicates {
     input:
-      inputBams = output_aligned_bam,
-      outputPath = sample_and_unmapped_bams.base_file_name + ".aligned.unsorted.duplicates_marked.bam",
+      inputBams = SortSampleBam.outputBam,
+      outputPath = sample_and_unmapped_bams.base_file_name + ".aligned.sorted.duplicates_marked.bam",
       threads = 4
   }
 
@@ -157,27 +165,20 @@ workflow UnmappedBamToAlignedBam {
   #call Processing.SortSam as SortSampleBam {
   #  input:
   #    input_bam = MarkDuplicates.outputBam,
-  #    output_bam_basename = sample_and_unmapped_bams.base_file_name + ".aligned.duplicate_marked.sorted",
+  #    output_bam_basename = sample_and_unmapped_bams.base_file_name + ".aligned.sorted.duplicate_marked",
   #    compression_level = compression_level,
   #    preemptible_tries = if data_too_large_for_preemptibles then 0 else papi_settings.agg_preemptible_tries
   #}
-  # Sort aggregated+deduped BAM file and fix tags
-  call Sambamba.Sort as SortSampleBam {
-    input:
-      inputBam = MarkDuplicates.outputBam,
-      outputPath = sample_and_unmapped_bams.base_file_name + ".aligned.duplicate_marked.sorted.bam",
-      compressionLevel = compression_level,
-      threads = 4
-  }
 
-  Float agg_bam_size = size(SortSampleBam.outputBam, "GiB")
+
+  Float agg_bam_size = size(MarkDuplicates.outputBam, "GiB")
 
   if (defined(haplotype_database_file)) {
     # Check identity of fingerprints across readgroups
     call QC.CrossCheckFingerprints as CrossCheckFingerprints {
       input:
-        input_bams = [ SortSampleBam.outputBam ],
-        input_bam_indexes = [SortSampleBam.outputBamIndex],
+        input_bams = [MarkDuplicates.outputBam ],
+        input_bam_indexes = [MarkDuplicates.outputBamIndex],
         haplotype_database_file = haplotype_database_file,
         metrics_filename = sample_and_unmapped_bams.base_file_name + ".crosscheck",
         total_input_size = agg_bam_size,
@@ -197,8 +198,8 @@ workflow UnmappedBamToAlignedBam {
   # Estimate level of cross-sample contamination
   call Processing.CheckContamination as CheckContamination {
     input:
-      input_bam = SortSampleBam.outputBam,
-      input_bam_index = SortSampleBam.outputBamIndex,
+      input_bam = MarkDuplicates.outputBam,
+      input_bam_index = MarkDuplicates.outputBamIndex,
       contamination_sites_ud = contamination_sites_ud,
       contamination_sites_bed = contamination_sites_bed,
       contamination_sites_mu = contamination_sites_mu,
@@ -221,8 +222,8 @@ workflow UnmappedBamToAlignedBam {
     # Generate the recalibration model by interval
     call Processing.BaseRecalibrator as BaseRecalibrator {
       input:
-        input_bam = SortSampleBam.outputBam,
-        input_bam_index = SortSampleBam.outputBamIndex,
+        input_bam = MarkDuplicates.outputBam,
+        input_bam_index = MarkDuplicates.outputBamIndex,
         recalibration_report_filename = sample_and_unmapped_bams.base_file_name + ".recal_data.csv",
         sequence_group_interval = subgroup,
         dbsnp_vcf = references.dbsnp_vcf,
@@ -250,8 +251,8 @@ workflow UnmappedBamToAlignedBam {
     # Apply the recalibration model by interval
     call Processing.ApplyBQSR as ApplyBQSR {
       input:
-        input_bam = SortSampleBam.outputBam,
-        input_bam_index = SortSampleBam.outputBamIndex,
+        input_bam = MarkDuplicates.outputBam,
+        input_bam_index = MarkDuplicates.outputBamIndex,
         output_bam_basename = recalibrated_bam_basename,
         recalibration_report = GatherBqsrReports.output_bqsr_report,
         sequence_group_interval = subgroup,
@@ -278,8 +279,8 @@ workflow UnmappedBamToAlignedBam {
 
   # Optional outputs controlled by input flags (to change when None is implemented)
   if (output_sorted_bam) {
-    File? sorted_bam_temp = SortSampleBam.outputBam
-    File? sorted_bam_index_temp = SortSampleBam.outputBamIndex
+    File? sorted_bam_temp = MarkDuplicates.outputBam
+    File? sorted_bam_index_temp = MarkDuplicates.outputBamIndex
   }
 
   # Outputs that will be retained when execution is complete
