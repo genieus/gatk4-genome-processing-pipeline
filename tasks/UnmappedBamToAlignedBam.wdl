@@ -217,7 +217,8 @@ workflow UnmappedBamToAlignedBam {
         ref_fasta = references.reference_fasta.ref_fasta,
         ref_fasta_index = references.reference_fasta.ref_fasta_index,
         bqsr_scatter = bqsr_divisor,
-        preemptible_tries = papi_settings.agg_preemptible_tries
+        preemptible_tries = papi_settings.agg_preemptible_tries,
+        nreadgroups = length(output_aligned_bam)
     }
   }
 
