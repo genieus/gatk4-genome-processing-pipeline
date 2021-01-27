@@ -664,3 +664,4 @@ task CollectVariantCallingMetrics {
     File detail_metrics = "~{metrics_basename}.variant_calling_detail_metrics"
   }
 }
+
