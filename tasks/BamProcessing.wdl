@@ -205,7 +205,6 @@ task MarkDuplicatesSpark {
   }
 }
 
-# Generate Base Quality Score Recalibration (BQSR) model
 task BaseRecalibrator {
   input {
     File input_bam
@@ -222,8 +221,10 @@ task BaseRecalibrator {
     Int bqsr_scatter
     Int preemptible_tries
     String gatk_docker = "us.gcr.io/broad-gatk/gatk:4.0.10.1"
+    Int nreadgroups = 1
   }
 
+  Int memory_size = ceil(6 + 0.6 * (nreadgroups-1)) # additional 0.6 for each new RG
   Float ref_size = size(ref_fasta, "GiB") + size(ref_fasta_index, "GiB") + size(ref_dict, "GiB")
   Float dbsnp_size = size(dbsnp_vcf, "GiB")
   Int disk_size = ceil((size(input_bam, "GiB") / bqsr_scatter) + ref_size + dbsnp_size) + 20
@@ -250,7 +251,7 @@ task BaseRecalibrator {
   runtime {
     docker: gatk_docker
     preemptible: preemptible_tries
-    memory: "6 GiB"
+    memory: "~{memory_size} GiB"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
