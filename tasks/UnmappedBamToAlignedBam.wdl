@@ -22,7 +22,7 @@ import "./Qc.wdl" as QC
 import "./BamProcessing.wdl" as Processing
 import "./Utilities.wdl" as Utils
 import "../structs/DNASeqStructs.wdl" as Structs
-import "../tasks/sambamba.wdl" as Sambamba
+import "../../tasks/sambamba.wdl" as Sambamba
 
 # WORKFLOW DEFINITION
 workflow UnmappedBamToAlignedBam {
