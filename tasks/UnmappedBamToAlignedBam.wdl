@@ -264,7 +264,8 @@ workflow UnmappedBamToAlignedBam {
         compression_level = compression_level,
         preemptible_tries = papi_settings.agg_preemptible_tries,
         bin_base_qualities = bin_base_qualities,
-        somatic = somatic
+        somatic = somatic,
+        nreadgroups = length(output_aligned_bam)
     }
   }
 

@@ -278,12 +278,13 @@ task ApplyBQSR {
     Int additional_disk = 20
     Boolean bin_base_qualities = true
     Boolean somatic = false
+    Int nreadgroups = 1
   }
 
   Float ref_size = size(ref_fasta, "GiB") + size(ref_fasta_index, "GiB") + size(ref_dict, "GiB")
   Int disk_size = ceil((size(input_bam, "GiB") * 3 / bqsr_scatter) + ref_size) + additional_disk
 
-  Int memory_size = ceil(3500 * memory_multiplier)
+  Int memory_size = ceil((3500 + (nreadgroups-1) * 300) * memory_multiplier)
 
   Boolean bin_somatic_base_qualities = bin_base_qualities && somatic
 
