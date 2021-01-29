@@ -108,6 +108,7 @@ task MarkDuplicates {
     String? read_name_regex
     Int memory_multiplier = 1
     Int additional_disk = 20
+    Float reserved_g = 1
   }
 
   # The merged bam will be smaller than the sum of the parts so we need to account for the unmerged inputs and the merged output.
@@ -115,15 +116,15 @@ task MarkDuplicates {
   Float md_disk_multiplier = 3
   Int disk_size = ceil(md_disk_multiplier * total_input_size) + additional_disk
 
-  Float memory_size = 7.5 * memory_multiplier
-  Int java_memory_size = (ceil(memory_size) - 2)
+  Float memory_size_g = 7.5 * memory_multiplier
+  Int java_memory_size_g = (ceil(memory_size_g) - reserved_g)
 
   # Task is assuming query-sorted input so that the Secondary and Supplementary reads get marked correctly
   # This works because the output of BWA is query-grouped and therefore, so is the output of MergeBamAlignment.
   # While query-grouped isn't actually query-sorted, it's good enough for MarkDuplicates with ASSUME_SORT_ORDER="queryname"
 
   command {
-    java -Dsamjdk.compression_level=~{compression_level} -Xms~{java_memory_size}g -jar /usr/gitc/picard.jar \
+    java -Dsamjdk.compression_level=~{compression_level} -Xms~{java_memory_size_g}g -jar /usr/gitc/picard.jar \
       MarkDuplicates \
       INPUT=~{sep=' INPUT=' input_bams} \
       OUTPUT=~{output_bam_basename}.bam \
@@ -138,7 +139,7 @@ task MarkDuplicates {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
-    memory: "~{memory_size} GiB"
+    memory: "~{memory_size_g} GiB"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -223,9 +224,11 @@ task BaseRecalibrator {
     Int preemptible_tries
     String gatk_docker = "us.gcr.io/broad-gatk/gatk:4.0.10.1"
     Int nreadgroups = 1
+    Float reserved_g = 1.0
   }
 
-  Int memory_size = ceil(6 + 0.6 * (nreadgroups-1)) # additional 0.6 for each new RG
+  Int memory_size_g = ceil(6 + 0.6 * (nreadgroups-1)) # additional 0.6 for each new RG
+  Int xmx_m = memory_size_g * 1000 - reserved_g * 1000
   Float ref_size = size(ref_fasta, "GiB") + size(ref_fasta_index, "GiB") + size(ref_dict, "GiB")
   Float dbsnp_size = size(dbsnp_vcf, "GiB")
   Int disk_size = ceil((size(input_bam, "GiB") / bqsr_scatter) + ref_size + dbsnp_size) + 20
@@ -239,7 +242,7 @@ task BaseRecalibrator {
   command {
     gatk --java-options "-XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:+PrintFlagsFinal \
       -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
-      -Xloggc:gc_log.log -Xms5g" \
+      -Xloggc:gc_log.log -Xms5g - Xmx~{xmx_m}m" \
       BaseRecalibrator \
       -R ~{ref_fasta} \
       -I ~{input_bam} \
@@ -252,7 +255,7 @@ task BaseRecalibrator {
   runtime {
     docker: gatk_docker
     preemptible: preemptible_tries
-    memory: "~{memory_size} GiB"
+    memory: "~{memory_size_g} GiB"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
@@ -280,12 +283,14 @@ task ApplyBQSR {
     Boolean bin_base_qualities = true
     Boolean somatic = false
     Int nreadgroups = 1
+    Float reserved_g = 1.0
   }
 
   Float ref_size = size(ref_fasta, "GiB") + size(ref_fasta_index, "GiB") + size(ref_dict, "GiB")
   Int disk_size = ceil((size(input_bam, "GiB") * 3 / bqsr_scatter) + ref_size) + additional_disk
 
-  Int memory_size = ceil((3500 + (nreadgroups-1) * 400) * memory_multiplier)
+  Int memory_size_m = ceil((3500 + (nreadgroups-1) * 400) * memory_multiplier)
+  Int xmx_m = memory_size_m - reserved_g * 1000
 
   Boolean bin_somatic_base_qualities = bin_base_qualities && somatic
 
@@ -297,8 +302,8 @@ task ApplyBQSR {
 
   command {
     gatk --java-options "-XX:+PrintFlagsFinal -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
-      -XX:+PrintGCDetails -Xloggc:gc_log.log \
-      -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Dsamjdk.compression_level=~{compression_level} -Xms3000m" \
+      -XX:+PrintGCDetails -Xloggc:gc_log.log -XX:GCTimeLimit=50 \
+      -XX:GCHeapFreeLimit=10 -Dsamjdk.compression_level=~{compression_level} -Xms3000m -Xmx~{xmx_m}m" \
       ApplyBQSR \
       --create-output-bam-md5 \
       --add-output-sam-program-record \
@@ -317,7 +322,7 @@ task ApplyBQSR {
   runtime {
     docker: gatk_docker
     preemptible: preemptible_tries
-    memory: "~{memory_size} MiB"
+    memory: "~{memory_size_m} MiB"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {

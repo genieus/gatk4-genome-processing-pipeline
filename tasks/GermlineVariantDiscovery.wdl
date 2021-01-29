@@ -92,6 +92,7 @@ task HaplotypeCaller_GATK4_VCF {
     Int preemptible_tries
     Int hc_scatter
     String gatk_docker = "us.gcr.io/broad-gatk/gatk:4.0.10.1"
+    Float reserved_g = 1.0
   }
 
   String output_suffix = if make_gvcf then ".g.vcf.gz" else ".vcf.gz"
@@ -99,6 +100,7 @@ task HaplotypeCaller_GATK4_VCF {
 
   Float ref_size = size(ref_fasta, "GiB") + size(ref_fasta_index, "GiB") + size(ref_dict, "GiB")
   Int disk_size = ceil(((size(input_bam, "GiB") + 30) / hc_scatter) + ref_size) + 20
+  Int xmx_m = round((8-reserved_g) * 1000)
 
   String bamout_arg = if make_bamout then "-bamout ~{vcf_basename}.bamout.bam" else ""
 
@@ -110,7 +112,7 @@ task HaplotypeCaller_GATK4_VCF {
 
   command <<<
     set -e
-    gatk --java-options "-Xms6000m -Xmx6000m -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10" \
+    gatk --java-options "-Xms6000m -Xmx~{xmx_m}m -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10" \
       HaplotypeCaller \
       -R ~{ref_fasta} \
       -I ~{input_bam} \
