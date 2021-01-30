@@ -117,14 +117,14 @@ task MarkDuplicates {
   Int disk_size = ceil(md_disk_multiplier * total_input_size) + additional_disk
 
   Float memory_size_g = 7.5 * memory_multiplier
-  Int java_memory_size_g = (ceil(memory_size_g) - reserved_g)
+  Int java_memory_size_m = ceil(1000*(memory_size_g - reserved_g))
 
   # Task is assuming query-sorted input so that the Secondary and Supplementary reads get marked correctly
   # This works because the output of BWA is query-grouped and therefore, so is the output of MergeBamAlignment.
   # While query-grouped isn't actually query-sorted, it's good enough for MarkDuplicates with ASSUME_SORT_ORDER="queryname"
 
   command {
-    java -Dsamjdk.compression_level=~{compression_level} -Xms~{java_memory_size_g}g -jar /usr/gitc/picard.jar \
+    java -Dsamjdk.compression_level=~{compression_level} -Xmx~{java_memory_size_m}m -Xms~{java_memory_size_m}m -jar /usr/gitc/picard.jar \
       MarkDuplicates \
       INPUT=~{sep=' INPUT=' input_bams} \
       OUTPUT=~{output_bam_basename}.bam \
