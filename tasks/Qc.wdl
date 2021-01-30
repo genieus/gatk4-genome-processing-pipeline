@@ -26,7 +26,7 @@ task CollectQualityYieldMetrics {
   Int disk_size = ceil(size(input_bam, "GiB")) + 20
 
   command {
-    java -Xms2000m -jar /usr/gitc/picard.jar \
+    java -Xms2000m -Xmx2000m -jar /usr/gitc/picard.jar \
       CollectQualityYieldMetrics \
       INPUT=~{input_bam} \
       OQ=true \
@@ -55,7 +55,7 @@ task CollectUnsortedReadgroupBamQualityMetrics {
   Int disk_size = ceil(size(input_bam, "GiB")) + 20
 
   command {
-    java -Xms5000m -jar /usr/gitc/picard.jar \
+    java -Xms5000m -Xmx5000m -jar /usr/gitc/picard.jar \
       CollectMultipleMetrics \
       INPUT=~{input_bam} \
       OUTPUT=~{output_bam_prefix} \
@@ -73,7 +73,7 @@ task CollectUnsortedReadgroupBamQualityMetrics {
   }
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
-    memory: "15 GiB"
+    memory: "6 GiB"
     cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
@@ -112,7 +112,7 @@ task CollectReadgroupBamQualityMetrics {
       ~{output_bam_prefix}.gc_bias.pdf \
       ~{output_bam_prefix}.gc_bias.summary_metrics
 
-    java -Xms5000m -jar /usr/gitc/picard.jar \
+    java -Xms5000m -Xmx5000m -jar /usr/gitc/picard.jar \
       CollectMultipleMetrics \
       INPUT=~{input_bam} \
       REFERENCE_SEQUENCE=~{ref_fasta} \
@@ -163,7 +163,7 @@ task CollectAggregationMetrics {
       ~{output_bam_prefix}.insert_size_metrics \
       ~{output_bam_prefix}.insert_size_histogram.pdf
 
-    java -Xms5000m -jar /usr/gitc/picard.jar \
+    java -Xms5000m -Xmx5000m -jar /usr/gitc/picard.jar \
       CollectMultipleMetrics \
       INPUT=~{input_bam} \
       REFERENCE_SEQUENCE=~{ref_fasta} \
@@ -302,7 +302,7 @@ task CheckFingerprint {
 
   command <<<
     java -Dsamjdk.buffer_size=131072 \
-      -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xms2g  \
+      -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xms2g -Xmx2g \
       -jar /usr/gitc/picard.jar \
       CheckFingerprint \
       INPUT=~{input_bam} \
@@ -400,7 +400,7 @@ task ValidateSamFile {
   Int java_memory_size = (memory_size - 1) * 1000
 
   command {
-    java -Xms~{java_memory_size}m -jar /usr/gitc/picard.jar \
+    java -Xms~{java_memory_size}m -Xmx~{java_memory_size}m -jar /usr/gitc/picard.jar \
       ValidateSamFile \
       INPUT=~{input_bam} \
       OUTPUT=~{report_filename} \
@@ -440,7 +440,7 @@ task CollectWgsMetrics {
   Int disk_size = ceil(size(input_bam, "GiB") + ref_size) + 20
 
   command {
-    java -Xms2000m -jar /usr/gitc/picard.jar \
+    java -Xms2000m -Xmx5000m -jar /usr/gitc/picard.jar \
       CollectWgsMetrics \
       INPUT=~{input_bam} \
       VALIDATION_STRINGENCY=SILENT \
@@ -455,7 +455,7 @@ task CollectWgsMetrics {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
-    memory: "15 GiB"
+    memory: "6 GiB"
     cpu: "1"
     disks: "local-disk " + disk_size + " HDD"
   }
@@ -486,7 +486,7 @@ task CollectRawWgsMetrics {
   String java_memory_size = (memory_size - 1) * 1000
 
   command {
-    java -Xms~{java_memory_size}m -jar /usr/gitc/picard.jar \
+    java -Xms~{java_memory_size}m -Xmx~{java_memory_size}m -jar /usr/gitc/picard.jar \
       CollectRawWgsMetrics \
       INPUT=~{input_bam} \
       VALIDATION_STRINGENCY=SILENT \
@@ -533,7 +533,7 @@ task CollectHsMetrics {
 
   # There are probably more metrics we want to generate with this tool
   command {
-    java -Xms~{java_memory_size}m -jar /usr/gitc/picard.jar \
+    java -Xms~{java_memory_size}m -Xmx~{java_memory_size}m -jar /usr/gitc/picard.jar \
       CollectHsMetrics \
       INPUT=~{input_bam} \
       REFERENCE_SEQUENCE=~{ref_fasta} \
@@ -571,7 +571,7 @@ task CalculateReadGroupChecksum {
   Int disk_size = ceil(size(input_bam, "GiB")) + 20
 
   command {
-    java -Xms1000m -jar /usr/gitc/picard.jar \
+    java -Xms1000m -Xmx1000m -jar /usr/gitc/picard.jar \
       CalculateReadGroupChecksum \
       INPUT=~{input_bam} \
       OUTPUT=~{read_group_md5_filename}
@@ -608,7 +608,7 @@ task ValidateVCF {
   Int disk_size = ceil(size(input_vcf, "GiB") + size(dbsnp_vcf, "GiB") + ref_size) + 20
 
   command {
-    gatk --java-options -Xms6000m \
+    gatk --java-options -Xms6000m -Xmx6000m \
       ValidateVariants \
       -V ~{input_vcf} \
       -R ~{ref_fasta} \
@@ -643,7 +643,7 @@ task CollectVariantCallingMetrics {
   Int disk_size = ceil(size(input_vcf, "GiB") + size(dbsnp_vcf, "GiB")) + 20
 
   command {
-    java -Xms2000m -jar /usr/gitc/picard.jar \
+    java -Xms2000m -Xmx2000m -jar /usr/gitc/picard.jar \
       CollectVariantCallingMetrics \
       INPUT=~{input_vcf} \
       OUTPUT=~{metrics_basename} \
@@ -664,4 +664,3 @@ task CollectVariantCallingMetrics {
     File detail_metrics = "~{metrics_basename}.variant_calling_detail_metrics"
   }
 }
-

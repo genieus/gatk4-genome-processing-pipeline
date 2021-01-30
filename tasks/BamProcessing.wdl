@@ -228,7 +228,7 @@ task BaseRecalibrator {
   }
 
   Int memory_size_g = ceil(6 + 0.6 * (nreadgroups-1)) # additional 0.6 for each new RG
-  Int xmx_m = memory_size_g * 1000 - reserved_g * 1000
+  Int xmx_m = round(memory_size_g * 1000 - reserved_g * 1000)
   Float ref_size = size(ref_fasta, "GiB") + size(ref_fasta_index, "GiB") + size(ref_dict, "GiB")
   Float dbsnp_size = size(dbsnp_vcf, "GiB")
   Int disk_size = ceil((size(input_bam, "GiB") / bqsr_scatter) + ref_size + dbsnp_size) + 20
@@ -290,7 +290,7 @@ task ApplyBQSR {
   Int disk_size = ceil((size(input_bam, "GiB") * 3 / bqsr_scatter) + ref_size) + additional_disk
 
   Int memory_size_m = ceil((3500 + (nreadgroups-1) * 400) * memory_multiplier)
-  Int xmx_m = memory_size_m - reserved_g * 1000
+  Int xmx_m = round(memory_size_m - reserved_g * 1000)
 
   Boolean bin_somatic_base_qualities = bin_base_qualities && somatic
 
