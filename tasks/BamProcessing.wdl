@@ -242,7 +242,7 @@ task BaseRecalibrator {
   command {
     gatk --java-options "-XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:+PrintFlagsFinal \
       -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
-      -Xloggc:gc_log.log -Xms5g - Xmx~{xmx_m}m" \
+      -Xloggc:gc_log.log -Xms5g -Xmx~{xmx_m}m" \
       BaseRecalibrator \
       -R ~{ref_fasta} \
       -I ~{input_bam} \
