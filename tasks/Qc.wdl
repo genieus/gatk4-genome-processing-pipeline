@@ -608,7 +608,7 @@ task ValidateVCF {
   Int disk_size = ceil(size(input_vcf, "GiB") + size(dbsnp_vcf, "GiB") + ref_size) + 20
 
   command {
-    gatk --java-options -Xms6000m -Xmx6000m \
+    gatk --java-options "-Xms6000m -Xmx6000m" \
       ValidateVariants \
       -V ~{input_vcf} \
       -R ~{ref_fasta} \
