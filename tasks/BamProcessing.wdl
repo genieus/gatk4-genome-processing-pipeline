@@ -303,7 +303,7 @@ task ApplyBQSR {
   command {
     gatk --java-options "-XX:+PrintFlagsFinal -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
       -XX:+PrintGCDetails -Xloggc:gc_log.log -XX:GCTimeLimit=50 \
-      -XX:GCHeapFreeLimit=10 -Dsamjdk.compression_level=~{compression_level} -Xms3000m -Xmx~{xmx_m}m" \
+      -XX:GCHeapFreeLimit=10 -Dsamjdk.compression_level=~{compression_level} -Xms~{xmx_m}m -Xmx~{xmx_m}m" \
       ApplyBQSR \
       --create-output-bam-md5 \
       --add-output-sam-program-record \
