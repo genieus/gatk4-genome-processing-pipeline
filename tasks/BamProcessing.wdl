@@ -416,7 +416,7 @@ task GatherUnsortedBamFiles {
   runtime {
     docker: "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.3-1564508330"
     preemptible: preemptible_tries
-    memory: "3 GiB"
+    memory: "4 GiB"
     disks: "local-disk " + disk_size + " HDD"
   }
   output {
